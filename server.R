@@ -1,6 +1,5 @@
 library(tidyverse)
 library(shiny)
-library(ggplot2)
 library(knitr)
 
 shinyServer(function(input, output){
