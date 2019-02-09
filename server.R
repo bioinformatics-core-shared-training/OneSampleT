@@ -285,8 +285,7 @@ shinyServer(function(input, output){
       )) %>%
       mutate(ci.lower = mean - 1.96 * sd / sqrt(n)) %>%
       mutate(ci.upper = mean + 1.96 * sd / sqrt(n)) %>%
-      mutate_at(vars(mean:ci.upper), funs(round(., digits = 3))) %>%
-      print(row.names = FALSE)
+      print(row.names = FALSE, digits = 4)
   })
 
 
