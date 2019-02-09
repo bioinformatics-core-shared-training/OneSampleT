@@ -1,6 +1,8 @@
+library(tidyverse)
 library(shiny)
 library(ggplot2)
 library(knitr)
+
 shinyServer(function(input, output){
   
   data <- reactive({inFile <- input$file1
@@ -268,24 +270,28 @@ shinyServer(function(input, output){
                              log = log(df[,datacol])
       )
     }
-    qs <- quantile(df[,datacol])
-    sumry <- RcmdrMisc:::numSummary(df[,datacol])
-    se <- sumry[[2]][,"sd"] / sqrt(sumry$n)
-    ci.lower <- sumry[[2]][,"mean"] - 1.96 * se
-    names(ci.lower) <- "CI.lower"
-    ci.upper <- sumry[[2]][,"mean"] + 1.96 * se
-    names(ci.upper) <- "CI.upper"
-    sumry$table <- cbind(sumry$table, ci.lower,ci.upper)
-    
-    sumry
+
+    df %>%
+      select(datacol) %>%
+      summarise_all(funs(
+        n(),
+        mean,
+        sd,
+        IQR,
+        `0%` = quantile(., 0),
+        `25%` = quantile(., 0.25),
+        `50%` = quantile(., 0.5),
+        `75%` = quantile(., 0.75),
+        `100%` = quantile(., 1.0)
+      )) %>%
+      mutate(ci.lower = mean - 1.96 * sd / sqrt(n)) %>%
+      mutate(ci.upper = mean + 1.96 * sd / sqrt(n)) %>%
+      mutate_at(vars(mean:ci.upper), funs(round(., digits = 3))) %>%
+      print(row.names = FALSE)
   })
 
-  
-  
-  
-  
+
   output$zdist <- renderPlot({
-    
     
     mu <- as.numeric(input$mu)
     alternative = input$alternative
