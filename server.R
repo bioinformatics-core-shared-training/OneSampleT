@@ -135,7 +135,6 @@ shinyServer(function(input, output){
                    log = log(mu)
       )
       if(is.infinite(mu)) mu <- 0
-      
     }
     
     
@@ -302,12 +301,11 @@ shinyServer(function(input, output){
                              log = log(df[,datacol])
       )
       
-      mu <- switch(mu,
+      mu <- switch(input$transform,
                    log.2 = log2(mu),
                    log.10 = log10(mu),
                    log = log(mu)
       )
-      
       if(is.infinite(mu)) mu <- 0
     }
     
