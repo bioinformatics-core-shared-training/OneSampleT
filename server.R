@@ -6,14 +6,10 @@ shinyServer(function(input, output){
   
   data <- reactive({inFile <- input$file1
   
-  df <- data.frame(Month= month.name, Failure = c(2.9,2.99,2.48,1.48,2.71,4.17,3.74,3.04,1.23,2.72,3.23,3.4))
-  if (is.null(inFile))
-    return(df)
-  
-  
-  print(inFile$name)
-  read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote,skip=input$skip)
-  #read.csv("GraphPad Course Data/diseaseX.csv")
+    df <- data.frame(Month= month.name, Failure = c(2.9,2.99,2.48,1.48,2.71,4.17,3.74,3.04,1.23,2.72,3.23,3.4))
+    if (is.null(inFile)) return(df)
+ 
+	  as.data.frame(read_csv(inFile$datapath))
   })
   
   #  output$plot <- renderPlot({
@@ -150,11 +146,11 @@ shinyServer(function(input, output){
     df$tmp <- factor(rep("x", nrow(df)))
     
     if(!input$violin){
-      p <- ggplot(df, aes(x=tmp,y=X)) + xlab("") + geom_boxplot(fill=rgb(236,0,140,maxColorValue = 255),alpha=0.5)
+      p <- ggplot(df, aes(x=tmp,y=X)) + xlab("") + geom_boxplot(fill=rgb(236,0,140,maxColorValue = 255),alpha=0.75)
       p <- p + geom_hline(yintercept = mu,lty=2,col="red") + ylim(xlim) + geom_jitter(position = position_jitter(width = .05)) + coord_flip()
       
     } else{
-      p <- ggplot(df, aes(x=tmp,y=X)) + xlab("") + geom_violin(fill=rgb(236,0,140,maxColorValue = 255),alpha=0.5) + geom_boxplot(fill="white",width=0.1)
+      p <- ggplot(df, aes(x=tmp,y=X)) + xlab("") + geom_violin(fill=rgb(236,0,140,maxColorValue = 255),alpha=0.75) + geom_boxplot(fill="white",width=0.1)
       p <- p + geom_hline(yintercept = mu,lty=2,col="red") + ylim(xlim) + geom_jitter(position = position_jitter(width = .05)) + coord_flip()
       
     }
@@ -274,14 +270,14 @@ shinyServer(function(input, output){
       select(datacol) %>%
       summarise_all(funs(
         n(),
-        mean,
-        sd,
-        IQR,
-        `0%` = quantile(., 0),
-        `25%` = quantile(., 0.25),
-        `50%` = quantile(., 0.5),
-        `75%` = quantile(., 0.75),
-        `100%` = quantile(., 1.0)
+        mean(., na.rm = TRUE),
+        sd(., na.rm = TRUE),
+        IQR(., na.rm = TRUE),
+        `0%` = quantile(., 0, na.rm = TRUE),
+        `25%` = quantile(., 0.25, na.rm = TRUE),
+        `50%` = quantile(., 0.5, na.rm = TRUE),
+        `75%` = quantile(., 0.75, na.rm = TRUE),
+        `100%` = quantile(., 1.0, na.rm = TRUE)
       )) %>%
       mutate(ci.lower = mean - 1.96 * sd / sqrt(n)) %>%
       mutate(ci.upper = mean + 1.96 * sd / sqrt(n)) %>%
@@ -390,19 +386,17 @@ shinyServer(function(input, output){
       paste(input$outfile, '.R', sep='')
     },
     content = function(file) {
+
+      cat(file = file, as.name("library(tidyverse)\n"))
+
       inFile <- input$file1
       
-      if (is.null(inFile)){
-        cat(file=file,as.name("data<-data.frame(Month=month.name,Failure=c(2.9,2.99,2.48,1.48,2.71,4.17,3.74,3.04,1.23,2.72,3.23,3.4))\n"))
+      if (is.null(inFile)) {
+        cat(file = file, as.name("data<-data.frame(Month=month.name,Failure=c(2.9,2.99,2.48,1.48,2.71,4.17,3.74,3.04,1.23,2.72,3.23,3.4))\n"), append = TRUE)
       }
-      
       else {
-        cat(file=file,as.name(paste0('myfile <- \"' , inFile$name, '\"\n')))
-        cat(file=file,as.name(paste0('sep <- \'', input$sep,'\'','\n')),append=TRUE)
-        cat(file=file,as.name(paste0('quote <- \'', input$quote,'\'','\n')),append=TRUE)
-        cat(file=file,as.name(paste('header <- ', input$header,'\n')),append=TRUE)
-        cat(file=file,as.name(paste('skip <- ', input$skip,'\n')),append=TRUE)
-        cat(file=file,as.name("data <- read.csv(myfile, header=header, sep=sep, quote=quote,skip=skip)\n"),append=TRUE)
+        cat(file = file, as.name(paste0('myfile <- \"' , inFile$name, '\"\n')), append = TRUE)
+        cat(file = file, as.name("data <- as.data.frame(read_csv(myfile))\n"), append=TRUE)
       }
       
       cat(file=file,as.name("head(data)\n"),append=TRUE)
@@ -418,7 +412,6 @@ shinyServer(function(input, output){
       cat(file=file,as.name("boxplot(X,horizontal=TRUE)\n"),append=TRUE)
       
       cat(file=file,as.name("colnames(data)[datacol] <- 'X'\n"),append=TRUE)
-      cat(file=file, as.name("library(ggplot2)\n"),append=TRUE)
       cat(file=file, as.name("ggplot(data, aes(x=X)) + geom_histogram(aes(y=..density..),binwidth=.5,colour='black', fill='white')+ stat_function(fun=dnorm,color='red',arg=list(mean=mean(data$X), sd=sd(data$X)))\n"),append=TRUE)
       
       cat(file=file,as.name(paste0('alternative <- \'', input$alternative,'\'','\n')),append=TRUE)
@@ -448,21 +441,19 @@ shinyServer(function(input, output){
       paste(input$outfile, '.Rmd', sep='')
     },
     content = function(file) {
-      inFile <- input$file1
+
       script <- gsub(".Rmd", ".R",file)
-      
-      if (is.null(inFile)){
-        cat(file=script,as.name("data<-data.frame(Month=month.name,Failure=c(2.9,2.99,2.48,1.48,2.71,4.17,3.74,3.04,1.23,2.72,3.23,3.4))\n"))
+
+      cat(file = script, as.name("library(tidyverse)\n"))
+
+      inFile <- input$file1
+ 
+      if (is.null(inFile)) {
+        cat(file = script, as.name("data<-data.frame(Month=month.name,Failure=c(2.9,2.99,2.48,1.48,2.71,4.17,3.74,3.04,1.23,2.72,3.23,3.4))\n"), append = TRUE)
       }
-      
-      else{
-        
-        cat(file=script,as.name(paste0('myfile <- \"' , inFile$name, '\"\n')))
-        cat(file=script,as.name(paste0('sep <- \'', input$sep,'\'','\n')),append=TRUE)
-        cat(file=script,as.name(paste0('quote <- \'', input$quote,'\'','\n')),append=TRUE)
-        cat(file=script,as.name(paste('header <- ', input$header,'\n')),append=TRUE)
-        cat(file=script,as.name(paste('skip <- ', input$skip,'\n')),append=TRUE)
-        cat(file=script,as.name("data <- read.csv(myfile, header=header, sep=sep, quote=quote,skip=skip)\n"),append=TRUE)
+      else {
+        cat(file = script, as.name(paste0('myfile <- \"' , inFile$name, '\"\n')), append = TRUE)
+        cat(file = script, as.name("data <- as.data.frame(read_csv(myfile))\n"),append = TRUE)
       }
       cat(file=script,as.name("head(data)\n"),append=TRUE)
       cat(file=script,as.name(paste("mu <- ", input$mu,'\n')),append=TRUE)
@@ -476,7 +467,6 @@ shinyServer(function(input, output){
       cat(file=script,as.name("summary(X)\n"),append=TRUE)
       cat(file=script,as.name("boxplot(X,horizontal=TRUE)\n"),append=TRUE)
       cat(file=script,as.name("colnames(data)[datacol] <- 'X'\n"),append=TRUE)
-      cat(file=script, as.name("library(ggplot2)\n"),append=TRUE)
       cat(file=script, as.name("ggplot(data, aes(x=X)) + geom_histogram(aes(y=..density..),binwidth=.5,colour='black', fill='white')+ stat_function(fun=dnorm,color='red',arg=list(mean=mean(data$X), sd=sd(data$X)))\n"),append=TRUE)
       
       cat(file=script,as.name(paste0('alternative <- \'', input$alternative,'\'','\n')),append=TRUE)
