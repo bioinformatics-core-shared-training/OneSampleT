@@ -233,21 +233,27 @@ shinyServer(function(input, output){
     
     else {
       print(wilcox.test(X,mu=mu,alternative=alternative))
-      cat("\n\nAlternative not assuming symmetrical distribution:\nSign test:\n")
-      df <- data.frame(X)
-      df$Sign <- "="
-      df$Sign[X > mu] <- "+"
-      df$Sign[X < mu] <- "-"
+#      cat("\nAlternative that does not assume a symmetrical distribution\n\n\tSign test\n\n")
+#      df <- data.frame(X)
+#      df$Sign <- "="
+#      df$Sign[X > mu] <- "+"
+#      df$Sign[X < mu] <- "-"
       
-      npos <- sum(X>mu)
-      nneg <- sum(X<mu)
-      x <- min(npos,nneg)
-      n <- sum(X != mu)
-      cat(paste("Number of +'s", npos,"\n"))
-      cat(paste("Number of -'s", nneg,"\n"))
-      cat(paste("Test statistic:", x,"\n"))
-      pv <- round(pbinom(q = x, size = n,prob = 0.5)*2,3)
-      cat(paste("P-value using binomial distribution with",n, "trials and p=0.5:",pv,"\n"))
+#      npos <- sum(X>mu)
+#      nneg <- sum(X<mu)
+#      x <- min(npos,nneg)
+#      n <- sum(X != mu)
+#      cat(paste("Number of +'s", npos, "\n"))
+#      cat(paste("Number of -'s", nneg, "\n"))
+
+#      cat(paste("Test statistic:", x,"\n"))
+#      p <- pbinom(q = x, size = n, prob = 0.5)
+#      p <- switch(input$alternative,
+#                  two.sided = p,
+#                  greater = p / 2,
+#  								less = 1 - p / 2)
+#      p <- round(p, digits = 3)
+#      cat(paste("P-value using binomial distribution with", n, "trials and p=0.5:", p, "\n"))
     }
   })
   
@@ -415,19 +421,20 @@ shinyServer(function(input, output){
       
       cat(file=file,as.name(paste0('alternative <- \'', input$alternative,'\'','\n')),append=TRUE)
       
-      if(input$do.parametric){
-        cat(file=file,as.name("t.test(X,mu=mu,alternative=alternative)\n"),append=TRUE)
+      if (input$do.parametric) {
+        cat(file = file, as.name("t.test(X, mu = mu, alternative = alternative)\n"), append = TRUE)
       } else {
-        cat(file=file,as.name("df <- data.frame(X)\n"),append=TRUE)
-        cat(file=file,as.name("df$Sign <- '='\n"),append=TRUE)
-        cat(file=file,as.name("df$Sign[X > mu] <- '+'\n"),append=TRUE)
-        cat(file=file,as.name("df$Sign[X < mu] <- '-'\n"),append=TRUE)
-        cat(file=file,as.name("npos <- sum(X>mu)\n"),append=TRUE)
-        cat(file=file,as.name("nneg <- sum(X<mu)\n"),append=TRUE)
-        cat(file=file,as.name("x <- min(npos,nneg)\n"),append=TRUE)
-        cat(file=file,as.name("n <- sum(X != mu)\n"),append=TRUE)
-        cat(file=file,as.name("pv <- round(pbinom(q = x, size = n,prob = 0.5)*2,3)\n"),append=TRUE)
-        cat(file=file,as.name("pv\n"),append=TRUE)
+        cat(file = file, as.name("wilcox.test(X, mu = mu, alternative = alternative)\n"), append = TRUE)
+#        cat(file=file,as.name("df <- data.frame(X)\n"),append=TRUE)
+#        cat(file=file,as.name("df$Sign <- '='\n"),append=TRUE)
+#        cat(file=file,as.name("df$Sign[X > mu] <- '+'\n"),append=TRUE)
+#        cat(file=file,as.name("df$Sign[X < mu] <- '-'\n"),append=TRUE)
+#        cat(file=file,as.name("npos <- sum(X>mu)\n"),append=TRUE)
+#        cat(file=file,as.name("nneg <- sum(X<mu)\n"),append=TRUE)
+#        cat(file=file,as.name("x <- min(npos,nneg)\n"),append=TRUE)
+#        cat(file=file,as.name("n <- sum(X != mu)\n"),append=TRUE)
+#        cat(file=file,as.name("p <- round(pbinom(q = x, size = n,prob = 0.5)*2,3)\n"),append=TRUE)
+#        cat(file=file,as.name("p\n"),append=TRUE)
       }
       cat(file=file,as.name("sessionInfo()\n"),append=TRUE)
       #formatR::tidy_source(source=file,output = file)
@@ -470,19 +477,20 @@ shinyServer(function(input, output){
       
       cat(file=script,as.name(paste0('alternative <- \'', input$alternative,'\'','\n')),append=TRUE)
       
-      if(input$do.parametric){
-        cat(file=script,as.name("t.test(X,mu=mu,alternative=alternative)\n"),append=TRUE)
+      if (input$do.parametric) {
+        cat(file = script, as.name("t.test(X, mu = mu, alternative = alternative)\n"), append = TRUE)
       } else {
-        cat(file=script,as.name("df <- data.frame(X)\n"),append=TRUE)
-        cat(file=script,as.name("df$Sign <- '='\n"),append=TRUE)
-        cat(file=script,as.name("df$Sign[X > mu] <- '+'\n"),append=TRUE)
-        cat(file=script,as.name("df$Sign[X < mu] <- '-'\n"),append=TRUE)
-        cat(file=script,as.name("npos <- sum(X>mu)\n"),append=TRUE)
-        cat(file=script,as.name("nneg <- sum(X<mu)\n"),append=TRUE)
-        cat(file=script,as.name("x <- min(npos,nneg)\n"),append=TRUE)
-        cat(file=script,as.name("n <- sum(X != mu)\n"),append=TRUE)
-        cat(file=script,as.name("pv <- round(pbinom(q = x, size = n,prob = 0.5)*2,3)\n"),append=TRUE)
-        cat(file=script,as.name("pv\n"),append=TRUE)
+        cat(file = script, as.name("wilcox.test(X, mu = mu, alternative = alternative)\n"), append = TRUE)
+#        cat(file=script,as.name("df <- data.frame(X)\n"),append=TRUE)
+#        cat(file=script,as.name("df$Sign <- '='\n"),append=TRUE)
+#        cat(file=script,as.name("df$Sign[X > mu] <- '+'\n"),append=TRUE)
+#        cat(file=script,as.name("df$Sign[X < mu] <- '-'\n"),append=TRUE)
+#        cat(file=script,as.name("npos <- sum(X>mu)\n"),append=TRUE)
+#        cat(file=script,as.name("nneg <- sum(X<mu)\n"),append=TRUE)
+#        cat(file=script,as.name("x <- min(npos,nneg)\n"),append=TRUE)
+#        cat(file=script,as.name("n <- sum(X != mu)\n"),append=TRUE)
+#        cat(file=script,as.name("p <- round(pbinom(q = x, size = n,prob = 0.5)*2,3)\n"),append=TRUE)
+#        cat(file=script,as.name("p\n"),append=TRUE)
       }
       cat(file=script,as.name("sessionInfo()\n"),append=TRUE)
       knitr:::spin(hair=script,knit = FALSE)
