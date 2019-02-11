@@ -1,7 +1,7 @@
 library(shiny)
 
 
-shinyUI(navbarPage("Explore the one-sample t-test",id="nav",
+shinyUI(navbarPage("Explore the one sample t-test",id="nav",
                    
                    tabPanel("About",
                             sidebarLayout(
@@ -81,7 +81,7 @@ shinyUI(navbarPage("Explore the one-sample t-test",id="nav",
                                            helpText("Don't forget to check that the value of the Hypothesized mean is correct. You change this on the Data Input tab")
                                            
                               ),
-                              mainPanel(h4("Screen output in R"),
+                              mainPanel(h4("One sample test"),
                                         verbatimTextOutput("ttest"),plotOutput("zdist")
                               )
                             )
