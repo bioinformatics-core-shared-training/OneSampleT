@@ -232,7 +232,8 @@ shinyServer(function(input, output){
     if(input$do.parametric) t.test(X,mu=mu,alternative=alternative)
     
     else {
-      cat("Using a sign test.....\n")
+      print(wilcox.test(X,mu=mu,alternative=alternative))
+      cat("\n\nAlternative not assuming symmetrical distribution:\nSign test:\n")
       df <- data.frame(X)
       df$Sign <- "="
       df$Sign[X > mu] <- "+"
