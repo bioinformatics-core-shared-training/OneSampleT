@@ -1,6 +1,7 @@
-library(tidyverse)
 library(shiny)
+library(tidyverse)
 library(knitr)
+library(DT)
 
 shinyServer(function(input, output){
   
@@ -33,7 +34,7 @@ shinyServer(function(input, output){
   #  })
   #
   
-  output$mytable= renderDataTable({
+  output$mytable= DT::renderDataTable({
     df <- data()
     datacol <- as.numeric(input$dataCol)
     
@@ -55,9 +56,8 @@ shinyServer(function(input, output){
       df$Sign[df[,datacol] < mu] <- "-"
     }
     
-    df
-    #    dput(df, file="data.rda")
-  }
+    datatable(df, rownames = FALSE)
+  }, server = FALSE
   )
   
   

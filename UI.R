@@ -1,4 +1,5 @@
 library(shiny)
+library(DT)
 
 
 shinyUI(navbarPage("Explore the one sample t-test",id="nav",
@@ -34,7 +35,7 @@ shinyUI(navbarPage("Explore the one sample t-test",id="nav",
                                            
                               )
                               ,
-                              mainPanel(dataTableOutput("mytable")
+                              mainPanel(DT::dataTableOutput("mytable")
                               )
                               
                             )
